@@ -6,6 +6,10 @@ module com.example.proyectodondeprobareelproyecto {
     requires com.dlsc.formsfx;
     requires org.kordamp.bootstrapfx.core;
 
+    exports com.example.proyectodondeprobareelproyecto.vista;
+    opens com.example.proyectodondeprobareelproyecto.vista to javafx.fxml;
+    requires javafx.media;
+
     opens com.example.proyectodondeprobareelproyecto to javafx.fxml;
     exports com.example.proyectodondeprobareelproyecto;
 }
