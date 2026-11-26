@@ -17,15 +17,24 @@ public class Grafo{
     }
 
     public void agregarConexion(String origen,String destino,int peso){
-        if(origen==null||destino==null||origen.equals(destino)||peso<0) return;
+        if(origen==null||destino==null||origen.equals(destino)||peso<0){
+            return;
+        }
         agregarUbicacion(origen);
         agregarUbicacion(destino);
         Ubicacion o=vertices.get(origen);
         Ubicacion d=vertices.get(destino);
         for(Conexion c:conexiones){
-            if(c.getOrigen().equals(o)&&c.getDestino().equals(d)) return;
+            if(c.getOrigen().equals(o)&&c.getDestino().equals(d)){
+                return;
+            }
         }
         conexiones.add(new Conexion(o,d,peso));
+    }
+
+    public void agregarConexionNoDirigida(String origen,String destino,int peso){
+        agregarConexion(origen,destino,peso);
+        agregarConexion(destino,origen,peso);
     }
 
     public void eliminarConexion(String origen,String destino){
@@ -33,6 +42,34 @@ public class Grafo{
                 c.getOrigen().getNombre().equals(origen)&&
                         c.getDestino().getNombre().equals(destino)
         );
+    }
+
+    public void modificarPeso(String origen,String destino,int nuevoPeso){
+        for(Conexion c:conexiones){
+            if(c.getOrigen().getNombre().equals(origen)&&c.getDestino().getNombre().equals(destino)){
+                c.setPeso(nuevoPeso);
+                return;
+            }
+        }
+    }
+
+    public void modificarNombre(String nombreActual,String nuevoNombre){
+        if(nuevoNombre==null||nuevoNombre.trim().isEmpty()||vertices.containsKey(nuevoNombre)){
+            return;
+        }
+        Ubicacion u=vertices.get(nombreActual);
+        if(u!=null){
+            vertices.remove(nombreActual);
+            vertices.put(nuevoNombre,new Ubicacion(nuevoNombre));
+            for(Conexion c:conexiones){
+                if(c.getOrigen().getNombre().equals(nombreActual)){
+                    c.getOrigen().setNombre(nuevoNombre);
+                }
+                if(c.getDestino().getNombre().equals(nombreActual)){
+                    c.getDestino().setNombre(nuevoNombre);
+                }
+            }
+        }
     }
 
     public Collection<Ubicacion> getVertices(){
@@ -78,11 +115,13 @@ public class Grafo{
         StringBuilder sb=new StringBuilder("Matriz de adyacencia:\n\n");
         sb.append(String.format("%-12s",""));
         for(String n:nombres){
-            sb.append(String.format("%-10s",n.length()>8?n.substring(0,8):n));
+            String corto=n.length()>8?n.substring(0,8):n;
+            sb.append(String.format("%-10s",corto));
         }
         sb.append("\n");
         for(String origen:nombres){
-            sb.append(String.format("%-12s",origen.length()>10?origen.substring(0,10):origen));
+            String corto=origen.length()>10?origen.substring(0,10):origen;
+            sb.append(String.format("%-12s",corto));
             for(String destino:nombres){
                 int peso=0;
                 for(Conexion c:conexiones){

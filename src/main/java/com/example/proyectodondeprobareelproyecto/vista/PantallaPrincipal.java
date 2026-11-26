@@ -19,8 +19,11 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,12 +83,16 @@ public class PantallaPrincipal extends BorderPane{
 
         VBox panelIzquierdo=new VBox(8);
         panelIzquierdo.setPadding(new Insets(16));
-        panelIzquierdo.setPrefWidth(230);
-        panelIzquierdo.setStyle("-fx-background-color:#0d1b2a; -fx-border-color:#415a77; -fx-border-width:2; -fx-border-radius:10; -fx-background-radius:10;");
+        panelIzquierdo.setStyle("-fx-background-color:#0d1b2a;");
 
         Label lblControles=new Label("Controles");
         lblControles.setTextFill(Color.WHITE);
         lblControles.setFont(Font.font("System",FontWeight.BOLD,15));
+
+        Button btnCargarCSV=crearBoton("Importar CSV");
+        Button btnGuardar=crearBoton("Guardar cambios");
+        Button btnGuardarComo=crearBoton("Guardar como");
+        Button btnNuevo=crearBoton("Nuevo grafo");
 
         TextField txtOrigen=new TextField();
         txtOrigen.setPromptText("Origen");
@@ -93,6 +100,8 @@ public class PantallaPrincipal extends BorderPane{
         txtDestino.setPromptText("Destino");
         TextField txtPeso=new TextField();
         txtPeso.setPromptText("Peso");
+        CheckBox chkNoDirigida=new CheckBox("No dirigida");
+        chkNoDirigida.setTextFill(Color.WHITE);
         Button btnAgregar=crearBoton("Agregar");
 
         TextField txtElimOrigen=new TextField();
@@ -101,26 +110,52 @@ public class PantallaPrincipal extends BorderPane{
         txtElimDestino.setPromptText("Destino");
         Button btnEliminar=crearBoton("Eliminar");
 
+        TextField txtModOrigen=new TextField();
+        txtModOrigen.setPromptText("Origen");
+        TextField txtModDestino=new TextField();
+        txtModDestino.setPromptText("Destino");
+        TextField txtModPeso=new TextField();
+        txtModPeso.setPromptText("Nuevo peso");
+        Button btnModificarPeso=crearBoton("Modificar peso");
+
+        TextField txtNombreActual=new TextField();
+        txtNombreActual.setPromptText("Nombre actual");
+        TextField txtNombreNuevo=new TextField();
+        txtNombreNuevo.setPromptText("Nuevo nombre");
+        Button btnModificarNombre=crearBoton("Modificar nombre");
+
         TextField txtInicio=new TextField();
-        txtInicio.setPromptText("Vértice inicial");
+        txtInicio.setPromptText("Origen");
+        TextField txtDestinoDijkstra=new TextField();
+        txtDestinoDijkstra.setPromptText("Destino");
         Button btnBFS=crearBoton("BFS");
         Button btnDFS=crearBoton("DFS");
         Button btnDijkstra=crearBoton("Dijkstra");
 
         Button btnQuick=crearBoton("QuickSort");
         Button btnShell=crearBoton("ShellSort");
-        Button btnReiniciar=crearBoton("Reiniciar");
+        Button btnNombre=crearBoton("Ordenar nombre");
+        Button btnTiempos=crearBoton("Medir tiempos");
         Button btnMostrar=crearBoton("Ver grafo");
 
         panelIzquierdo.getChildren().addAll(
                 lblControles,
-                new Label("Agregar"),txtOrigen,txtDestino,txtPeso,btnAgregar,
+                btnCargarCSV,btnGuardar,btnGuardarComo,btnNuevo,
+                new Label("Agregar"),txtOrigen,txtDestino,txtPeso,chkNoDirigida,btnAgregar,
                 new Label("Eliminar"),txtElimOrigen,txtElimDestino,btnEliminar,
+                new Label("Modificar peso"),txtModOrigen,txtModDestino,txtModPeso,btnModificarPeso,
+                new Label("Modificar nombre"),txtNombreActual,txtNombreNuevo,btnModificarNombre,
                 new Separator(),
-                new Label("Algoritmos"),txtInicio,btnBFS,btnDFS,btnDijkstra,
+                new Label("Algoritmos"),txtInicio,txtDestinoDijkstra,btnBFS,btnDFS,btnDijkstra,
                 new Separator(),
-                btnQuick,btnShell,btnReiniciar,btnMostrar
+                btnQuick,btnShell,btnNombre,btnTiempos,btnMostrar
         );
+
+        ScrollPane scrollIzquierdo=new ScrollPane(panelIzquierdo);
+        scrollIzquierdo.setFitToWidth(true);
+        scrollIzquierdo.setPrefWidth(250);
+        scrollIzquierdo.setStyle("-fx-background:#0d1b2a; -fx-border-color:#415a77; -fx-border-width:2; -fx-border-radius:10;");
+        scrollIzquierdo.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         VBox panelDerecho=new VBox(10);
         panelDerecho.setPadding(new Insets(16));
@@ -133,8 +168,12 @@ public class PantallaPrincipal extends BorderPane{
 
         areaInfo=new TextArea();
         areaInfo.setEditable(false);
-        areaInfo.setPrefHeight(180);
         areaInfo.setStyle("-fx-control-inner-background:#0d1b2a; -fx-text-fill:#e0e0e0;");
+
+        ScrollPane scrollInfo=new ScrollPane(areaInfo);
+        scrollInfo.setFitToWidth(true);
+        scrollInfo.setPrefHeight(180);
+        scrollInfo.setStyle("-fx-background:#0d1b2a;");
 
         Label lblExtra=new Label("Representación");
         lblExtra.setTextFill(Color.WHITE);
@@ -143,14 +182,19 @@ public class PantallaPrincipal extends BorderPane{
         Button btnLista=crearBoton("Lista adyacencia");
         Button btnMatriz=crearBoton("Matriz adyacencia");
 
-        panelDerecho.getChildren().addAll(lblInfo,areaInfo,lblExtra,btnLista,btnMatriz);
+        panelDerecho.getChildren().addAll(lblInfo,scrollInfo,lblExtra,btnLista,btnMatriz);
 
         areaDibujo=new Pane();
         areaDibujo.setStyle("-fx-background-color:#0d1b2a;");
-        areaDibujo.setPrefSize(680,320);
-        areaDibujo.setMaxSize(680,320);
-        areaDibujo.setClip(new Rectangle(680,320));
+        areaDibujo.setPrefHeight(320);
+        areaDibujo.setMinHeight(280);
+        areaDibujo.setMaxHeight(320);
         areaDibujo.setOnMouseClicked(e->abrirVentanaGrafo(null,null));
+
+        Rectangle clip=new Rectangle();
+        clip.widthProperty().bind(areaDibujo.widthProperty());
+        clip.heightProperty().bind(areaDibujo.heightProperty());
+        areaDibujo.setClip(clip);
 
         tabla=new TableView<>();
         TableColumn<Conexion,String> colOrigen=new TableColumn<>("Origen");
@@ -162,10 +206,43 @@ public class PantallaPrincipal extends BorderPane{
         tabla.getColumns().addAll(colOrigen,colDestino,colPeso);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        VBox panelCentral=new VBox(8);
-        panelCentral.setPadding(new Insets(8));
+        VBox panelCentral=new VBox(6);
+        panelCentral.setPadding(new Insets(6));
         panelCentral.getChildren().addAll(areaDibujo,tabla);
         VBox.setVgrow(tabla,Priority.ALWAYS);
+
+        btnCargarCSV.setOnAction(e->{
+            FileChooser fc=new FileChooser();
+            fc.setTitle("Seleccionar CSV");
+            fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV","*.csv"));
+            File archivo=fc.showOpenDialog(null);
+            if(archivo!=null){
+                controlador.cargarDesdeArchivo(archivo);
+                actualizar();
+            }
+        });
+
+        btnGuardar.setOnAction(e->{
+            controlador.guardarCambios();
+            abrirVentanaTexto("Guardado","Cambios guardados");
+        });
+
+        btnGuardarComo.setOnAction(e->{
+            FileChooser fc=new FileChooser();
+            fc.setTitle("Guardar CSV");
+            fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV","*.csv"));
+            fc.setInitialFileName("conexiones.csv");
+            File archivo=fc.showSaveDialog(null);
+            if(archivo!=null){
+                controlador.guardarComo(archivo);
+                abrirVentanaTexto("Guardado","Archivo guardado en:\n"+archivo.getAbsolutePath());
+            }
+        });
+
+        btnNuevo.setOnAction(e->{
+            controlador.nuevoGrafo();
+            actualizar();
+        });
 
         btnAgregar.setOnAction(e->{
             try{
@@ -173,7 +250,11 @@ public class PantallaPrincipal extends BorderPane{
                 String d=txtDestino.getText().trim();
                 int p=Integer.parseInt(txtPeso.getText().trim());
                 if(!o.isEmpty()&&!d.isEmpty()&&!o.equals(d)&&p>=0){
-                    controlador.agregarConexion(o,d,p);
+                    if(chkNoDirigida.isSelected()){
+                        controlador.agregarConexionNoDirigida(o,d,p);
+                    }else{
+                        controlador.agregarConexion(o,d,p);
+                    }
                     actualizar();
                     txtOrigen.clear();
                     txtDestino.clear();
@@ -190,6 +271,32 @@ public class PantallaPrincipal extends BorderPane{
                 actualizar();
                 txtElimOrigen.clear();
                 txtElimDestino.clear();
+            }
+        });
+
+        btnModificarPeso.setOnAction(e->{
+            try{
+                String o=txtModOrigen.getText().trim();
+                String d=txtModDestino.getText().trim();
+                int p=Integer.parseInt(txtModPeso.getText().trim());
+                if(!o.isEmpty()&&!d.isEmpty()&&p>=0){
+                    controlador.modificarPeso(o,d,p);
+                    actualizar();
+                    txtModOrigen.clear();
+                    txtModDestino.clear();
+                    txtModPeso.clear();
+                }
+            }catch(Exception ex){}
+        });
+
+        btnModificarNombre.setOnAction(e->{
+            String actual=txtNombreActual.getText().trim();
+            String nuevo=txtNombreNuevo.getText().trim();
+            if(!actual.isEmpty()&&!nuevo.isEmpty()){
+                controlador.modificarNombre(actual,nuevo);
+                actualizar();
+                txtNombreActual.clear();
+                txtNombreNuevo.clear();
             }
         });
 
@@ -216,23 +323,51 @@ public class PantallaPrincipal extends BorderPane{
         });
 
         btnDijkstra.setOnAction(e->{
-            String inicio=txtInicio.getText().trim();
-            if(inicio.isEmpty()) return;
-            Map<Ubicacion,Integer> d=controlador.calcularDijkstra(inicio);
-            if(d!=null){
-                StringBuilder sb=new StringBuilder("Dijkstra desde "+inicio+":\n");
-                d.forEach((u,val)->sb.append(u.getNombre()).append(": ").append(val==Integer.MAX_VALUE?"∞":val).append("\n"));
-                abrirVentanaTexto("Dijkstra",sb.toString());
-                abrirVentanaGrafo(null,d);
-            }
+            String origen=txtInicio.getText().trim();
+            String destino=txtDestinoDijkstra.getText().trim();
+            if(origen.isEmpty()||destino.isEmpty()) return;
+            String resultado=controlador.obtenerRutaDijkstra(origen,destino);
+            abrirVentanaTexto("Dijkstra",resultado);
         });
 
         btnQuick.setOnAction(e->tabla.getItems().setAll(controlador.ordenarPorPesoQuick()));
         btnShell.setOnAction(e->tabla.getItems().setAll(controlador.ordenarPorPesoShell()));
+        btnNombre.setOnAction(e->tabla.getItems().setAll(controlador.ordenarPorNombreQuick()));
 
-        btnReiniciar.setOnAction(e->{
-            controlador.reiniciar();
-            actualizar();
+        btnTiempos.setOnAction(e->{
+            StringBuilder sb=new StringBuilder("Tiempos de ejecución:\n\n");
+            long t1,t2;
+            String primerVertice="";
+            if(!controlador.getGrafo().getVertices().isEmpty()){
+                primerVertice=controlador.getGrafo().getVertices().iterator().next().getNombre();
+            }
+
+            t1=System.nanoTime();
+            controlador.recorrerBFS(primerVertice);
+            t2=System.nanoTime();
+            sb.append("BFS: ").append(String.format("%.3f",(t2-t1)/1_000_000.0)).append(" ms\n");
+
+            t1=System.nanoTime();
+            controlador.recorrerDFS(primerVertice);
+            t2=System.nanoTime();
+            sb.append("DFS: ").append(String.format("%.3f",(t2-t1)/1_000_000.0)).append(" ms\n");
+
+            t1=System.nanoTime();
+            controlador.calcularDijkstra(primerVertice);
+            t2=System.nanoTime();
+            sb.append("Dijkstra: ").append(String.format("%.3f",(t2-t1)/1_000_000.0)).append(" ms\n");
+
+            t1=System.nanoTime();
+            controlador.ordenarPorPesoQuick();
+            t2=System.nanoTime();
+            sb.append("QuickSort: ").append(String.format("%.3f",(t2-t1)/1_000_000.0)).append(" ms\n");
+
+            t1=System.nanoTime();
+            controlador.ordenarPorPesoShell();
+            t2=System.nanoTime();
+            sb.append("ShellSort: ").append(String.format("%.3f",(t2-t1)/1_000_000.0)).append(" ms\n");
+
+            abrirVentanaTexto("Tiempos",sb.toString());
         });
 
         btnLista.setOnAction(e->abrirVentanaTexto("Lista de adyacencia",controlador.obtenerListaAdyacenciaTexto()));
@@ -241,10 +376,14 @@ public class PantallaPrincipal extends BorderPane{
         actualizar();
 
         this.setTop(barraSuperior);
-        this.setLeft(panelIzquierdo);
+        this.setLeft(scrollIzquierdo);
         this.setRight(panelDerecho);
         this.setCenter(panelCentral);
         this.setStyle("-fx-background-color:#0d1b2a;");
+    }
+
+    public void guardarAlSalir(){
+        controlador.guardarAlSalir();
     }
 
     private Button crearBoton(String texto){
@@ -270,21 +409,15 @@ public class PantallaPrincipal extends BorderPane{
     private void abrirVentanaGrafo(List<Ubicacion> visitados,Map<Ubicacion,Integer> distancias){
         Stage stage=new Stage();
         stage.setTitle(visitados!=null?"Recorrido":"Grafo");
-
         Pane pane=new Pane();
         pane.setStyle("-fx-background-color:#0d1b2a;");
-        pane.setPrefSize(1600,1000);
-
+        pane.setPrefSize(2500,1800);
         dibujarGrafoEn(pane,1.2,visitados,distancias);
-
         ScrollPane scroll=new ScrollPane(pane);
         scroll.setPannable(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scroll.setStyle("-fx-background:#0d1b2a;");
-
-        Scene scene=new Scene(scroll,1100,750);
-        stage.setScene(scene);
+        stage.setScene(new Scene(scroll,1100,750));
         stage.show();
     }
 
@@ -300,7 +433,6 @@ public class PantallaPrincipal extends BorderPane{
 
     private void dibujarGrafoEn(Pane pane,double escala,List<Ubicacion> visitados,Map<Ubicacion,Integer> distancias){
         pane.getChildren().clear();
-
         try{
             Image fondo=new Image(getClass().getResource("/background/fondo.gif").toExternalForm());
             ImageView bg=new ImageView(fondo);
@@ -313,45 +445,52 @@ public class PantallaPrincipal extends BorderPane{
         var grafo=controlador.getGrafo();
         Map<String,Circle> nodos=new HashMap<>();
 
-        Map<String,double[]> pos=new HashMap<>();
-        pos.put("Biblioteca",new double[]{160*escala,90*escala});
-        pos.put("Laboratorio",new double[]{420*escala,90*escala});
-        pos.put("Cafeteria",new double[]{160*escala,240*escala});
-        pos.put("Ingenieria",new double[]{420*escala,240*escala});
-        pos.put("Rectoria",new double[]{160*escala,390*escala});
-        pos.put("Gimnasio",new double[]{420*escala,390*escala});
+        Map<String,double[]> posFijas=new HashMap<>();
+        posFijas.put("Biblioteca",new double[]{200*escala,120*escala});
+        posFijas.put("Laboratorio",new double[]{500*escala,120*escala});
+        posFijas.put("Cafeteria",new double[]{200*escala,320*escala});
+        posFijas.put("Ingenieria",new double[]{500*escala,320*escala});
+        posFijas.put("Rectoria",new double[]{200*escala,520*escala});
+        posFijas.put("Gimnasio",new double[]{500*escala,520*escala});
+
+        List<Ubicacion> lista=new ArrayList<>(grafo.getVertices());
+        int total=lista.size();
+        int limite=Math.min(total,50);
 
         int extra=0;
-        for(Ubicacion u:grafo.getVertices()){
-            double[] p=pos.get(u.getNombre());
+        int columnas=5;
+        double espaciadoX=250*escala;
+        double espaciadoY=200*escala;
+
+        for(int i=0;i<limite;i++){
+            Ubicacion u=lista.get(i);
+            double[] p=posFijas.get(u.getNombre());
             if(p==null){
-                int fila=extra/2;
-                int col=extra%2;
-                p=new double[]{(600+col*140)*escala,(90+fila*140)*escala};
+                int fila=extra/columnas;
+                int col=extra%columnas;
+                p=new double[]{(180+col*espaciadoX),(150+fila*espaciadoY)};
                 extra++;
             }
 
             StackPane nodo=new StackPane();
-            nodo.setLayoutX(p[0]-34*escala);
-            nodo.setLayoutY(p[1]-34*escala);
-
-            Circle c=new Circle(34*escala);
+            nodo.setLayoutX(p[0]-28*escala);
+            nodo.setLayoutY(p[1]-28*escala);
+            Circle c=new Circle(28*escala);
             c.setFill(visitados!=null&&visitados.contains(u)?Color.web("#e63946"):Color.web("#457b9d"));
             c.setStroke(Color.WHITE);
             c.setStrokeWidth(2.5);
 
             String texto=u.getNombre();
+            if(texto.length()>8) texto=texto.substring(0,6)+"..";
             if(visitados!=null){
                 int orden=visitados.indexOf(u)+1;
-                if(orden>0) texto=orden+"\n"+u.getNombre();
+                if(orden>0) texto=orden+"\n"+texto;
             }
-
             Label lb=new Label(texto);
             lb.setTextFill(Color.WHITE);
-            lb.setFont(Font.font("System",FontWeight.BOLD,10*escala));
+            lb.setFont(Font.font("System",FontWeight.BOLD,8*escala));
             lb.setAlignment(Pos.CENTER);
             lb.setTextAlignment(TextAlignment.CENTER);
-
             nodo.getChildren().addAll(c,lb);
             pane.getChildren().add(nodo);
             nodos.put(u.getNombre(),c);
@@ -363,24 +502,26 @@ public class PantallaPrincipal extends BorderPane{
             if(o!=null&&d!=null){
                 StackPane padreO=(StackPane)o.getParent();
                 StackPane padreD=(StackPane)d.getParent();
-
                 double ox=padreO.getLayoutX()+o.getRadius();
                 double oy=padreO.getLayoutY()+o.getRadius();
                 double dx=padreD.getLayoutX()+d.getRadius();
                 double dy=padreD.getLayoutY()+d.getRadius();
-
                 Line ln=new Line(ox,oy,dx,dy);
                 ln.setStroke(Color.web("#cccccc"));
-                ln.setStrokeWidth(2);
+                ln.setStrokeWidth(1.5);
                 pane.getChildren().add(1,ln);
 
                 double mx=(ox+dx)/2;
                 double my=(oy+dy)/2;
+                double angulo=Math.atan2(dy-oy,dx-ox);
+                double offsetX=Math.sin(angulo)*18;
+                double offsetY=-Math.cos(angulo)*18;
+
                 Label peso=new Label(String.valueOf(cn.getPeso()));
-                peso.setLayoutX(mx-14);
-                peso.setLayoutY(my-11);
+                peso.setLayoutX(mx+offsetX-12);
+                peso.setLayoutY(my+offsetY-6);
                 peso.setTextFill(Color.WHITE);
-                peso.setStyle("-fx-background-color:#0d1b2a; -fx-padding:2 6; -fx-background-radius:4;");
+                peso.setStyle("-fx-background-color:#0d1b2a; -fx-padding:1 4; -fx-background-radius:3; -fx-font-size:9;");
                 pane.getChildren().add(peso);
             }
         }

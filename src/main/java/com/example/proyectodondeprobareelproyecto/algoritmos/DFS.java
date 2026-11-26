@@ -15,12 +15,12 @@ public class DFS{
         return res;
     }
 
-    private static void dfs(Grafo g,Ubicacion a,Set<Ubicacion> v,List<Ubicacion> r){
-        v.add(a);
-        r.add(a);
-        for(Conexion c:g.getConexiones()){
-            if(c.getOrigen().equals(a)&&!v.contains(c.getDestino())){
-                dfs(g,c.getDestino(),v,r);
+    private static void dfs(Grafo grafo,Ubicacion actual,Set<Ubicacion> vis,List<Ubicacion> res){
+        vis.add(actual);
+        res.add(actual);
+        for(Conexion c:grafo.getConexiones()){
+            if(c.getOrigen().equals(actual)&&!vis.contains(c.getDestino())){
+                dfs(grafo,c.getDestino(),vis,res);
             }
         }
     }

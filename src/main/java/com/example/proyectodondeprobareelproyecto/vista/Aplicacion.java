@@ -9,10 +9,15 @@ import javafx.stage.Stage;
  */
 public class Aplicacion extends Application{
 
+    private PantallaPrincipal pantalla;
+
     @Override
     public void start(Stage stage){
+        pantalla=new PantallaPrincipal();
+        Scene scene=new Scene(pantalla,1200,750);
         stage.setTitle("Sistema de Rutas - Grafos");
-        stage.setScene(new Scene(new PantallaPrincipal(),1100,700));
+        stage.setScene(scene);
+        stage.setOnCloseRequest(e->pantalla.guardarAlSalir());
         stage.show();
     }
 

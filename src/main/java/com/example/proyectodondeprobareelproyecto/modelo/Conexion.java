@@ -1,7 +1,7 @@
 package com.example.proyectodondeprobareelproyecto.modelo;
 
 /**
- * Representa una arista con peso entre dos ubicaciones.
+ * Representa una conexión entre dos ubicaciones.
  */
 public class Conexion{
 
@@ -27,8 +27,7 @@ public class Conexion{
         return peso;
     }
 
-    @Override
-    public String toString(){
-        return origen+" -> "+destino+" ("+peso+")";
+    public void setPeso(int peso){
+        this.peso=peso;
     }
 }
